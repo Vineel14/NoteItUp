@@ -4,7 +4,7 @@ import { Settings, Help, Add, MoreVert } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
-const LeftDrawer = () => {
+const LeftDrawer = ({ setSelectedSubject }) => {
   const [subjects, setSubjects] = useState([]);
   const [hoveredSubject, setHoveredSubject] = useState(null);
 
@@ -32,6 +32,7 @@ const LeftDrawer = () => {
           sx={{
             '&:hover': { backgroundColor: '#E9F3FF' }, // Hover background color
           }}
+          onClick={() => setSelectedSubject("All Files")} // Reset to "All Files"
         >
           <ListItemIcon>
             <Settings />
@@ -44,6 +45,7 @@ const LeftDrawer = () => {
           sx={{
             '&:hover': { backgroundColor: '#E9F3FF' }, // Hover background color
           }}
+          onClick={() => setSelectedSubject("All Files")} // Reset to "All Files"
         >
           <ListItemIcon>
             <Help />
@@ -60,6 +62,7 @@ const LeftDrawer = () => {
           sx={{
             '&:hover': { backgroundColor: '#E9F3FF' }, // Hover background color
           }}
+          onClick={() => setSelectedSubject("All Files")} // Default heading
         >
           <ListItemText primary="All Files" />
         </ListItem>
@@ -76,26 +79,29 @@ const LeftDrawer = () => {
         </ListItem>
 
         {/* Dynamic list of subjects */}
-        {subjects.map((subject, index) => (
-          <ListItem
-            key={index}
-            button
-            onMouseEnter={() => setHoveredSubject(index)}
-            onMouseLeave={() => setHoveredSubject(null)}
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              '&:hover': { backgroundColor: '#E9F3FF' }, // Hover background color for dynamic subjects
-            }}
-          >
-            <ListItemText primary={subject} />
-            {hoveredSubject === index && (
-              <IconButton edge="end">
-                <MoreVert />
-              </IconButton>
-            )}
-          </ListItem>
-        ))}
+        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+          {subjects.map((subject, index) => (
+            <ListItem
+              key={index}
+              button
+              onClick={() => setSelectedSubject(subject)}  // Update the heading with the selected subject
+              onMouseEnter={() => setHoveredSubject(index)}
+              onMouseLeave={() => setHoveredSubject(null)}
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                '&:hover': { backgroundColor: '#E9F3FF' }, // Hover background color for dynamic subjects
+              }}
+            >
+              <ListItemText primary={subject} />
+              {hoveredSubject === index && (
+                <IconButton edge="end">
+                  <MoreVert />
+                </IconButton>
+              )}
+            </ListItem>
+          ))}
+        </div>
       </List>
     </Drawer>
   );

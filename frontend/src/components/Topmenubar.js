@@ -1,7 +1,8 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, InputBase, IconButton, Avatar } from '@mui/material';
+import { AppBar, Toolbar, Typography, InputBase, IconButton, Avatar, Box } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
+import logo from '../assets/logo.png';  // Assuming your logo is in the assets folder
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -42,7 +43,10 @@ const Topmenubar = () => {
   return (
     <AppBar position="static" sx={{ backgroundColor: '#D4E7FF' }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* Increased the size of the logo */}
+          <img src={logo} alt="Logo" style={{ height: '55px', marginRight: '10px' }} />
+          
           {/* Left side: Web app name */}
           <Typography 
             variant="h5" 
@@ -63,11 +67,11 @@ const Topmenubar = () => {
               inputProps={{ 'aria-label': 'search' }}
             />
           </Search>
-        </div>
+        </Box>
 
         {/* Right side: Avatar with 'User' */}
         <IconButton edge="end" color="inherit">
-          <Avatar sx={{ width: 56, height: 56 }}>User</Avatar>
+          <Avatar sx={{ width: 55, height: 55 }}>User</Avatar>
         </IconButton>
       </Toolbar>
     </AppBar>
