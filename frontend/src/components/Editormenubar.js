@@ -14,7 +14,7 @@ const Editormenubar = ({ fileNumber }) => {
   }, [fileNumber]);
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: '#D4E7FF' }}>
+    <AppBar position="fixed" sx={{ backgroundColor: '#D4E7FF' }}>  {/* Changed position to 'fixed' */}
       <Toolbar>
         {/* Left side: Display file name */}
         <Typography variant="h6" noWrap component="div" sx={{ color: 'black', fontWeight: 'bold' }}>
