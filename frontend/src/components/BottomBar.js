@@ -9,11 +9,12 @@ const BottomBar = () => {
         bottom: 0,
         width: '100%',
         height: '20px',
-        backgroundColor: '#E5E5E5',
+        backgroundColor: '#EAEAEA',
         display: 'flex',
         alignItems: 'center',
         paddingLeft: '10px',
-        zIndex: 1200
+        zIndex: 1200,
+        borderTop: '1px solid #BFBFBF',  // Darker top border
       }}
     >
       <Typography variant="body2" component="div">
