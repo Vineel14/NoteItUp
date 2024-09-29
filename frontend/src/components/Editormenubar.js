@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { AppBar, Toolbar, IconButton, Box } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';  // Pen icon
 import DeleteIcon from '@mui/icons-material/Delete';  // Eraser icon
+import UndoIcon from '@mui/icons-material/Undo';  // Undo icon
+import RedoIcon from '@mui/icons-material/Redo';  // Redo icon
 import { format } from 'date-fns';  // Helps format the date for the file name
 
-const Editormenubar = ({ setIsPenActive, setIsEraserActive, fileNumber }) => {
+const Editormenubar = ({ setIsPenActive, setIsEraserActive, undo, redo, fileNumber }) => {
   const [fileName, setFileName] = useState('');
   const [isPenSelected, setIsPenSelected] = useState(false);
   const [isEraserSelected, setIsEraserSelected] = useState(false);
@@ -40,8 +42,18 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, fileNumber }) => {
           {fileName}
         </Box>
 
-        {/* Center the Pen and Eraser buttons */}
+        {/* Center the Pen, Eraser, Undo, and Redo buttons */}
         <Box sx={{ display: 'flex', gap: 2 }}>
+          {/* Undo button */}
+          <IconButton onClick={undo}>
+            <UndoIcon />
+          </IconButton>
+
+          {/* Redo button */}
+          <IconButton onClick={redo}>
+            <RedoIcon />
+          </IconButton>
+
           {/* Pen button */}
           <IconButton color={isPenSelected ? 'primary' : 'default'} onClick={handlePenClick}>
             <CreateIcon />

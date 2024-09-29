@@ -8,12 +8,18 @@ const EditorPage = ({ fileNumber }) => {
   const [isPenActive, setIsPenActive] = useState(false);  // State to track pen tool
   const [isEraserActive, setIsEraserActive] = useState(false);  // State to track eraser tool
 
+  // We'll keep the undo and redo handlers within the HandwritingCanvas
+  const [undoHandler, setUndoHandler] = useState(() => () => {});
+  const [redoHandler, setRedoHandler] = useState(() => () => {});
+
   return (
     <div>
       {/* Fixed Editormenubar at the top */}
       <Editormenubar
         setIsPenActive={setIsPenActive}
         setIsEraserActive={setIsEraserActive}
+        undo={undoHandler}  // Use the undoHandler reference
+        redo={redoHandler}  // Use the redoHandler reference
         fileNumber={fileNumber}
       />
 
@@ -47,6 +53,8 @@ const EditorPage = ({ fileNumber }) => {
           <HandwritingCanvas
             isPenActive={isPenActive}
             isEraserActive={isEraserActive}
+            setUndoHandler={setUndoHandler}  // Pass undo handler to canvas
+            setRedoHandler={setRedoHandler}  // Pass redo handler to canvas
           />
         </Box>
       </Box>
