@@ -1,17 +1,17 @@
 import React, { useRef, useEffect, useState } from 'react';
 import paper from 'paper';
 
-const HandwritingCanvas = ({ isPenActive }) => {
+const HandwritingCanvas = ({ isPenActive, isEraserActive }) => {
   const canvasRef = useRef(null);
   const [tool, setTool] = useState(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    
+
     // Initialize Paper.js with the canvas once
     paper.setup(canvas);
 
-    // Create a new tool for drawing and set it only once
+    // Create a new tool for drawing/erasing
     const newTool = new paper.Tool();
     setTool(newTool);
 
@@ -22,27 +22,49 @@ const HandwritingCanvas = ({ isPenActive }) => {
   }, []);
 
   useEffect(() => {
-    if (!tool) return;  // Ensure the tool exists
+    if (!tool) return;
 
     if (isPenActive) {
-      // Enable drawing functionality when the pen is active
+      // Drawing mode
       let path;
       tool.onMouseDown = (event) => {
         path = new paper.Path();
         path.strokeColor = 'black';
-        path.strokeWidth = 2;  // You can adjust stroke width for smoother lines
+        path.strokeWidth = 2;
         path.add(event.point);
       };
 
       tool.onMouseDrag = (event) => {
-        path.add(event.point);  // Add points to the path as the mouse drags
+        path.add(event.point);
+      };
+    } else if (isEraserActive) {
+      // Erasing mode
+      tool.onMouseDown = (event) => {
+        // Try to hit-test the stroke more precisely
+        const hitResult = paper.project.hitTest(event.point, {
+          stroke: true,  // Focus on the stroke rather than segments
+          tolerance: 10  // Increase tolerance to make hit detection more forgiving
+        });
+        if (hitResult && hitResult.item) {
+          hitResult.item.remove();  // Remove the entire stroke/path
+        }
+      };
+
+      tool.onMouseDrag = (event) => {
+        const hitResult = paper.project.hitTest(event.point, {
+          stroke: true,  // Focus on the stroke rather than segments
+          tolerance: 10  // Increase tolerance for dragging to erase
+        });
+        if (hitResult && hitResult.item) {
+          hitResult.item.remove();  // Continuously remove the path as the eraser is dragged
+        }
       };
     } else {
-      // Disable drawing but keep the tool registered
+      // Disable both drawing and erasing when neither tool is active
       tool.onMouseDown = null;
       tool.onMouseDrag = null;
     }
-  }, [isPenActive, tool]);  // Only update the tool when isPenActive or tool changes
+  }, [isPenActive, isEraserActive, tool]);
 
   return (
     <canvas

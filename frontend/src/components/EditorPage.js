@@ -6,11 +6,16 @@ import HandwritingCanvas from './HandwritingCanvas';  // Import the handwriting 
 
 const EditorPage = ({ fileNumber }) => {
   const [isPenActive, setIsPenActive] = useState(false);  // State to track pen tool
+  const [isEraserActive, setIsEraserActive] = useState(false);  // State to track eraser tool
 
   return (
     <div>
       {/* Fixed Editormenubar at the top */}
-      <Editormenubar setIsPenActive={setIsPenActive} fileNumber={fileNumber} />
+      <Editormenubar
+        setIsPenActive={setIsPenActive}
+        setIsEraserActive={setIsEraserActive}
+        fileNumber={fileNumber}
+      />
 
       {/* Scrollable Editor Content */}
       <Box
@@ -38,9 +43,11 @@ const EditorPage = ({ fileNumber }) => {
             position: 'relative',
           }}
         >
-       
           {/* Handwriting Canvas */}
-          <HandwritingCanvas isPenActive={isPenActive} />
+          <HandwritingCanvas
+            isPenActive={isPenActive}
+            isEraserActive={isEraserActive}
+          />
         </Box>
       </Box>
 
