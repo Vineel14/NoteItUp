@@ -1,43 +1,46 @@
-import React from 'react';
-import { Typography, Box } from '@mui/material';
+import React, { useState } from 'react';
+import { Box } from '@mui/material';
 import Editormenubar from './Editormenubar';  // Import Editormenubar
 import BottomBar from './BottomBar';  // Import BottomBar
+import HandwritingCanvas from './HandwritingCanvas';  // Import the handwriting canvas
 
 const EditorPage = ({ fileNumber }) => {
+  const [isPenActive, setIsPenActive] = useState(false);  // State to track pen tool
+
   return (
     <div>
       {/* Fixed Editormenubar at the top */}
-      <Editormenubar fileNumber={fileNumber} />
+      <Editormenubar setIsPenActive={setIsPenActive} fileNumber={fileNumber} />
 
       {/* Scrollable Editor Content */}
       <Box
         sx={{
-          backgroundColor: '#EAEAEA',  // Editor content background color
-          marginTop: '40px',  // Ensure content is below the fixed Editormenubar (same height as the menubar)
-          marginBottom: '10px',  // Gap for BottomBar height
-          height: 'auto',  // Full height minus Editormenubar and BottomBar
-          overflowY: 'auto',  // Scrollable content
+          backgroundColor: '#EAEAEA',
+          marginTop: '40px',
+          marginBottom: '10px',
+          height: 'auto',
+          overflowY: 'auto',
           display: 'flex',
-          justifyContent: 'center',  // Center the page horizontally
-          alignItems: 'flex-start',  // Align the page at the top
-          paddingTop: '50px',  // 15px gap between Editormenubar and page
-          paddingBottom: '25px',  // 15px gap between BottomBar and page
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          paddingTop: '40px',
+          paddingBottom: '15px',
         }}
       >
-        {/* The actual white page */}
+        {/* White page where the canvas is rendered */}
         <Box
           sx={{
             backgroundColor: 'white',
             width: '794px',  // A4 size width in pixels (for web display)
             height: '1123px',  // A4 size height in pixels
-            padding: 3,  // Internal padding for page content
-            boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.1)',  // Subtle shadow to mimic a paper effect
-            marginBottom: '15px',  // Space between bottom of page and BottomBar
+            padding: 3,
+            boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.1)',
+            position: 'relative',
           }}
         >
-          <Typography variant="h4" component="h1">
-            New File Created
-          </Typography>
+       
+          {/* Handwriting Canvas */}
+          <HandwritingCanvas isPenActive={isPenActive} />
         </Box>
       </Box>
 
