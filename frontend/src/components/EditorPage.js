@@ -3,12 +3,11 @@ import { Box } from '@mui/material';
 import Editormenubar from './Editormenubar';  // Import Editormenubar
 import BottomBar from './BottomBar';  // Import BottomBar
 import HandwritingCanvas from './HandwritingCanvas';  // Import the handwriting canvas
+import UndoRedoButtons from './UndoRedoButtons';  // Import UndoRedoButtons
 
 const EditorPage = ({ fileNumber }) => {
   const [isPenActive, setIsPenActive] = useState(false);  // State to track pen tool
   const [isEraserActive, setIsEraserActive] = useState(false);  // State to track eraser tool
-
-  // We'll keep the undo and redo handlers within the HandwritingCanvas
   const [undoHandler, setUndoHandler] = useState(() => () => {});
   const [redoHandler, setRedoHandler] = useState(() => () => {});
 
@@ -18,10 +17,11 @@ const EditorPage = ({ fileNumber }) => {
       <Editormenubar
         setIsPenActive={setIsPenActive}
         setIsEraserActive={setIsEraserActive}
-        undo={undoHandler}  // Use the undoHandler reference
-        redo={redoHandler}  // Use the redoHandler reference
         fileNumber={fileNumber}
       />
+
+      {/* Undo/Redo buttons fixed at the top right corner of the editor content */}
+      <UndoRedoButtons undo={undoHandler} redo={redoHandler} />
 
       {/* Scrollable Editor Content */}
       <Box
@@ -42,19 +42,28 @@ const EditorPage = ({ fileNumber }) => {
         <Box
           sx={{
             backgroundColor: 'white',
-            width: '794px',  // A4 size width in pixels (for web display)
-            height: '1123px',  // A4 size height in pixels
+            width: {
+              xs: '90%',  // On small screens (like iPad), the paper takes 90% of the editor area
+              md: '794px',  // A4 size width in pixels for desktop
+            },
+            height: {
+              xs: 'auto',  // Adjust height for mobile
+              md: '1123px',  // A4 size height for desktop
+            },
+            maxWidth: '100%',
+            maxHeight: '100%',
             padding: 3,
             boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.1)',
             position: 'relative',
+            aspectRatio: '794 / 1123',  // Maintain A4 aspect ratio on all screens
           }}
         >
           {/* Handwriting Canvas */}
           <HandwritingCanvas
             isPenActive={isPenActive}
             isEraserActive={isEraserActive}
-            setUndoHandler={setUndoHandler}  // Pass undo handler to canvas
-            setRedoHandler={setRedoHandler}  // Pass redo handler to canvas
+            setUndoHandler={setUndoHandler}
+            setRedoHandler={setRedoHandler}
           />
         </Box>
       </Box>

@@ -8,11 +8,34 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
   const [redoStack, setRedoStack] = useState([]);  // Stack for undone actions
   const [erasedItems, setErasedItems] = useState([]);  // Temporary array to hold erased items
 
+  // Adjust canvas resolution for better clarity
+  const adjustCanvasResolution = () => {
+    const canvas = canvasRef.current;
+    const pixelRatio = window.devicePixelRatio || 1;
+    
+    // Set canvas width and height according to the display's pixel ratio
+    canvas.width = canvas.offsetWidth * pixelRatio;
+    canvas.height = canvas.offsetHeight * pixelRatio;
+    
+    // Maintain CSS size while scaling internal resolution
+    canvas.style.width = `${canvas.offsetWidth}px`;
+    canvas.style.height = `${canvas.offsetHeight}px`;
+
+    // Update Paper.js view size for the new canvas dimensions
+    paper.view.viewSize = new paper.Size(canvas.width, canvas.height);
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
 
     // Initialize Paper.js with the canvas once
     paper.setup(canvas);
+
+    // Adjust the canvas resolution for better rendering
+    adjustCanvasResolution();
+
+    // Handle window resize to keep canvas resolution updated
+    window.addEventListener('resize', adjustCanvasResolution);
 
     // Create a new tool for drawing/erasing
     const newTool = new paper.Tool();
@@ -21,6 +44,7 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
     return () => {
       // Clean up on component unmount
       newTool.remove();
+      window.removeEventListener('resize', adjustCanvasResolution);
     };
   }, []);
 
@@ -32,8 +56,8 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
       let path;
       tool.onMouseDown = (event) => {
         path = new paper.Path();
-        path.strokeColor = 'black';
-        path.strokeWidth = 2;
+        path.strokeColor = 'blue';
+        path.strokeWidth = 1.5;
         path.add(event.point);
       };
 
@@ -42,6 +66,8 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
       };
 
       tool.onMouseUp = () => {
+        path.smooth();  // Smooth the path for better curves
+
         setActionStack((prevActions) => [
           ...prevActions,
           { type: 'draw', item: path },  // Record the draw action

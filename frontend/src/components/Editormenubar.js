@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { AppBar, Toolbar, IconButton, Box } from '@mui/material';
+import { AppBar, Toolbar, Box, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';  // Pen icon
 import DeleteIcon from '@mui/icons-material/Delete';  // Eraser icon
-import UndoIcon from '@mui/icons-material/Undo';  // Undo icon
-import RedoIcon from '@mui/icons-material/Redo';  // Redo icon
 import { format } from 'date-fns';  // Helps format the date for the file name
 
-const Editormenubar = ({ setIsPenActive, setIsEraserActive, undo, redo, fileNumber }) => {
+const Editormenubar = ({ setIsPenActive, setIsEraserActive, fileNumber }) => {
   const [fileName, setFileName] = useState('');
-  const [isPenSelected, setIsPenSelected] = useState(false);
-  const [isEraserSelected, setIsEraserSelected] = useState(false);
+  const [selectedTool, setSelectedTool] = useState(null);
 
   // Set the default file name as "Month Date, Year (N)"
   useEffect(() => {
@@ -18,20 +15,16 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, undo, redo, fileNumb
     setFileName(`${formattedDate} (${fileNumber})`);
   }, [fileNumber]);
 
-  // Toggle pen tool on button click
-  const handlePenClick = () => {
-    setIsPenSelected(true);
-    setIsEraserSelected(false);
-    setIsPenActive(true);       // Activate pen
-    setIsEraserActive(false);   // Deactivate eraser
-  };
-
-  // Toggle eraser tool on button click
-  const handleEraserClick = () => {
-    setIsPenSelected(false);
-    setIsEraserSelected(true);
-    setIsPenActive(false);      // Deactivate pen
-    setIsEraserActive(true);    // Activate eraser
+  // Handle toggle button changes (Pen or Eraser)
+  const handleToolChange = (event, newTool) => {
+    if (newTool === 'pen') {
+      setIsPenActive(true);
+      setIsEraserActive(false);
+    } else if (newTool === 'eraser') {
+      setIsPenActive(false);
+      setIsEraserActive(true);
+    }
+    setSelectedTool(newTool);
   };
 
   return (
@@ -42,28 +35,23 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, undo, redo, fileNumb
           {fileName}
         </Box>
 
-        {/* Center the Pen, Eraser, Undo, and Redo buttons */}
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          {/* Undo button */}
-          <IconButton onClick={undo}>
-            <UndoIcon />
-          </IconButton>
-
-          {/* Redo button */}
-          <IconButton onClick={redo}>
-            <RedoIcon />
-          </IconButton>
-
+        {/* Center the ToggleButtonGroup for Pen and Eraser */}
+        <ToggleButtonGroup
+          value={selectedTool}
+          exclusive
+          onChange={handleToolChange}
+          sx={{ display: 'flex', gap: 0 }}
+        >
           {/* Pen button */}
-          <IconButton color={isPenSelected ? 'primary' : 'default'} onClick={handlePenClick}>
+          <ToggleButton value="pen">
             <CreateIcon />
-          </IconButton>
+          </ToggleButton>
 
           {/* Eraser button */}
-          <IconButton color={isEraserSelected ? 'primary' : 'default'} onClick={handleEraserClick}>
+          <ToggleButton value="eraser">
             <DeleteIcon />
-          </IconButton>
-        </Box>
+          </ToggleButton>
+        </ToggleButtonGroup>
 
         <Box sx={{ flexGrow: 1 }} />
       </Toolbar>
