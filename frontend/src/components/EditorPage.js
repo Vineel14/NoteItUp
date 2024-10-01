@@ -9,6 +9,7 @@ const EditorPage = ({ fileNumber }) => {
   const [isPenActive, setIsPenActive] = useState(false);  // State to track pen tool
   const [isEraserActive, setIsEraserActive] = useState(false);  // State to track eraser tool
   const [penThickness, setPenThickness] = useState(1);  // Default pen thickness
+  const [penColor, setPenColor] = useState('#000000');  // Default pen color (black)
   const [undoHandler, setUndoHandler] = useState(() => () => {});
   const [redoHandler, setRedoHandler] = useState(() => () => {});
 
@@ -19,6 +20,7 @@ const EditorPage = ({ fileNumber }) => {
         setIsPenActive={setIsPenActive}
         setIsEraserActive={setIsEraserActive}
         setPenThickness={setPenThickness}  // Pass pen thickness setter
+        setPenColor={setPenColor}  // Pass pen color setter
         fileNumber={fileNumber}
       />
 
@@ -65,6 +67,7 @@ const EditorPage = ({ fileNumber }) => {
             isPenActive={isPenActive}
             isEraserActive={isEraserActive}
             penThickness={penThickness}  // Pass the pen thickness to the canvas
+            penColor={penColor}  // Pass the pen color to the canvas
             setUndoHandler={setUndoHandler}
             setRedoHandler={setRedoHandler}
           />

@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { AppBar, Toolbar, Box, IconButton, ButtonGroup, Button, Menu, Typography } from '@mui/material';
+import { AppBar, Toolbar, Box, IconButton, ButtonGroup, Button, Menu, Typography, Divider } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';  // Pen icon
 import DeleteIcon from '@mui/icons-material/Delete';  // Eraser icon
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { format } from 'date-fns';  // Helps format the date for the file name
 
-const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, fileNumber }) => {
+const colors = [
+  '#000000', '#0000FF', '#FF0000', '#008000', '#FFFF00', '#FFA500', '#800080', '#FFC0CB', '#A52A2A', '#808080',
+  '#FFFFFF', '#ADD8E6', '#00008B', '#00FFFF', '#FF00FF', '#EE82EE', '#006400', '#90EE90', '#008080', '#40E0D0',
+  '#800020', '#800000', '#FFDAB9', '#FF7F50', '#FFD700', '#C0C0C0', '#E6E6FA', '#000080', '#228B22', '#F5F5DC'
+];
+
+const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, setPenColor, fileNumber }) => {
   const [fileName, setFileName] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedTool, setSelectedTool] = useState(null);  // For managing pen and eraser states
   const [penSizeLabel, setPenSizeLabel] = useState('PEN(s)');  // For managing pen label
   const [selectedThickness, setSelectedThickness] = useState('small'); // For selected thickness
+  const [selectedColor, setSelectedColor] = useState('black');  // For selected color
 
   // Set the default file name as "Month Date, Year (N)"
   useEffect(() => {
@@ -55,7 +62,12 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, fil
       setPenSizeLabel('PEN(l)');
     }
     setSelectedThickness(size);
-    handleMenuClose();  // Close the menu after selecting a thickness
+  };
+
+  // Handle color selection
+  const handleColorClick = (color) => {
+    setPenColor(color);  // Update the pen color in the parent component
+    setSelectedColor(color);
   };
 
   return (
@@ -104,6 +116,7 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, fil
               onClose={handleMenuClose}
               sx={{ padding: '10px' }}
             >
+              {/* Thickness options */}
               <Typography variant="caption" sx={{ padding: '5px 10px', fontWeight: 'bold' }}>Thickness</Typography>
               <Box sx={{ display: 'flex', gap: 2, padding: '5px 10px' }}>
                 <Typography
@@ -139,6 +152,35 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, fil
                 >
                   L
                 </Typography>
+              </Box>
+
+              {/* Divider between Thickness and Color */}
+              <Divider sx={{ margin: '10px 0' }} />
+
+              {/* Color options */}
+              <Typography variant="caption" sx={{ padding: '5px 10px', fontWeight: 'bold' }}>Color</Typography>
+              <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(3, 1fr)', 
+                gap: 2, 
+                padding: '5px 10px', 
+                maxHeight: '150px', 
+                overflowY: 'auto'  // Make the color grid scrollable
+              }}>
+                {colors.map((color) => (
+                  <Box
+                    key={color}
+                    onClick={() => handleColorClick(color)}
+                    sx={{
+                      width: '30px',
+                      height: '30px',
+                      backgroundColor: color,
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      border: selectedColor === color ? '2px solid red' : 'none'
+                    }}
+                  />
+                ))}
               </Box>
             </Menu>
           </ButtonGroup>

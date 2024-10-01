@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import paper from 'paper';
 
-const HandwritingCanvas = ({ isPenActive, isEraserActive, penThickness, setUndoHandler, setRedoHandler }) => {
+const HandwritingCanvas = ({ isPenActive, isEraserActive, penThickness, penColor, setUndoHandler, setRedoHandler }) => {
   const canvasRef = useRef(null);
   const [tool, setTool] = useState(null);
   const [actionStack, setActionStack] = useState([]);  // Stack to track all actions (pen or eraser)
@@ -37,7 +37,7 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, penThickness, setUndoH
 
         // Create a new path
         const newPath = new paper.Path();
-        newPath.strokeColor = 'blue';
+        newPath.strokeColor = penColor;  // Use the pen color
         newPath.strokeWidth = penThickness;  // Set the pen stroke thickness
         newPath.fullySelected = false;
 
@@ -108,7 +108,7 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, penThickness, setUndoH
       tool.onMouseDown = null;
       tool.onMouseDrag = null;
     }
-  }, [isPenActive, isEraserActive, tool, path, penThickness]);
+  }, [isPenActive, isEraserActive, tool, path, penThickness, penColor]);
 
   // Memoize the undo handler to avoid re-renders
   const handleUndo = useCallback(() => {
