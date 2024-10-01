@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import paper from 'paper';
 
-const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRedoHandler }) => {
+const HandwritingCanvas = ({ isPenActive, isEraserActive, penThickness, setUndoHandler, setRedoHandler }) => {
   const canvasRef = useRef(null);
   const [tool, setTool] = useState(null);
   const [actionStack, setActionStack] = useState([]);  // Stack to track all actions (pen or eraser)
@@ -37,8 +37,9 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
 
         // Create a new path
         const newPath = new paper.Path();
-        newPath.strokeColor = 'black';
-        newPath.fullySelected = false;  // Select the path to see segments
+        newPath.strokeColor = 'blue';
+        newPath.strokeWidth = penThickness;  // Set the pen stroke thickness
+        newPath.fullySelected = false;
 
         setPath(newPath);  // Update the current path reference
       };
@@ -57,7 +58,7 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
           // Simplify the path to remove unnecessary segments and smooth the stroke
           path.simplify();
 
-          path.fullySelected = false;  // Keep it selected to see the segments after simplification
+          path.fullySelected = false;
 
           const newSegmentCount = path.segments.length;
           const difference = segmentCount - newSegmentCount;
@@ -107,7 +108,7 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
       tool.onMouseDown = null;
       tool.onMouseDrag = null;
     }
-  }, [isPenActive, isEraserActive, tool, path]);
+  }, [isPenActive, isEraserActive, tool, path, penThickness]);
 
   // Memoize the undo handler to avoid re-renders
   const handleUndo = useCallback(() => {

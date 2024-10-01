@@ -8,6 +8,7 @@ import UndoRedoButtons from './UndoRedoButtons';  // Import UndoRedoButtons
 const EditorPage = ({ fileNumber }) => {
   const [isPenActive, setIsPenActive] = useState(false);  // State to track pen tool
   const [isEraserActive, setIsEraserActive] = useState(false);  // State to track eraser tool
+  const [penThickness, setPenThickness] = useState(1);  // Default pen thickness
   const [undoHandler, setUndoHandler] = useState(() => () => {});
   const [redoHandler, setRedoHandler] = useState(() => () => {});
 
@@ -17,6 +18,7 @@ const EditorPage = ({ fileNumber }) => {
       <Editormenubar
         setIsPenActive={setIsPenActive}
         setIsEraserActive={setIsEraserActive}
+        setPenThickness={setPenThickness}  // Pass pen thickness setter
         fileNumber={fileNumber}
       />
 
@@ -62,6 +64,7 @@ const EditorPage = ({ fileNumber }) => {
           <HandwritingCanvas
             isPenActive={isPenActive}
             isEraserActive={isEraserActive}
+            penThickness={penThickness}  // Pass the pen thickness to the canvas
             setUndoHandler={setUndoHandler}
             setRedoHandler={setRedoHandler}
           />
