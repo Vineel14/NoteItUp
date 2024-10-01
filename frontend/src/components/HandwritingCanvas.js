@@ -6,36 +6,13 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
   const [tool, setTool] = useState(null);
   const [actionStack, setActionStack] = useState([]);  // Stack to track all actions (pen or eraser)
   const [redoStack, setRedoStack] = useState([]);  // Stack for undone actions
-  const [erasedItems, setErasedItems] = useState([]);  // Temporary array to hold erased items
-
-  // Adjust canvas resolution for better clarity
-  const adjustCanvasResolution = () => {
-    const canvas = canvasRef.current;
-    const pixelRatio = window.devicePixelRatio || 1;
-    
-    // Set canvas width and height according to the display's pixel ratio
-    canvas.width = canvas.offsetWidth * pixelRatio;
-    canvas.height = canvas.offsetHeight * pixelRatio;
-    
-    // Maintain CSS size while scaling internal resolution
-    canvas.style.width = `${canvas.offsetWidth}px`;
-    canvas.style.height = `${canvas.offsetHeight}px`;
-
-    // Update Paper.js view size for the new canvas dimensions
-    paper.view.viewSize = new paper.Size(canvas.width, canvas.height);
-  };
+  const [path, setPath] = useState(null);  // Track the current path being drawn
 
   useEffect(() => {
     const canvas = canvasRef.current;
 
     // Initialize Paper.js with the canvas once
     paper.setup(canvas);
-
-    // Adjust the canvas resolution for better rendering
-    adjustCanvasResolution();
-
-    // Handle window resize to keep canvas resolution updated
-    window.addEventListener('resize', adjustCanvasResolution);
 
     // Create a new tool for drawing/erasing
     const newTool = new paper.Tool();
@@ -44,7 +21,6 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
     return () => {
       // Clean up on component unmount
       newTool.remove();
-      window.removeEventListener('resize', adjustCanvasResolution);
     };
   }, []);
 
@@ -53,38 +29,63 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
 
     if (isPenActive) {
       // Drawing mode
-      let path;
       tool.onMouseDown = (event) => {
-        path = new paper.Path();
-        path.strokeColor = 'blue';
-        path.strokeWidth = 1.5;
-        path.add(event.point);
+        // Deselect previous path
+        if (path) {
+          path.selected = false;
+        }
+
+        // Create a new path
+        const newPath = new paper.Path();
+        newPath.strokeColor = 'black';
+        newPath.fullySelected = false;  // Select the path to see segments
+
+        setPath(newPath);  // Update the current path reference
       };
 
       tool.onMouseDrag = (event) => {
-        path.add(event.point);
+        // Add a segment to the path at the current mouse position
+        if (path) {
+          path.add(event.point);
+        }
       };
 
-      tool.onMouseUp = () => {
-        path.smooth();  // Smooth the path for better curves
+      tool.onMouseUp = (event) => {
+        if (path) {
+          const segmentCount = path.segments.length;
 
-        setActionStack((prevActions) => [
-          ...prevActions,
-          { type: 'draw', item: path },  // Record the draw action
-        ]);
-        setRedoStack([]);  // Clear the redo stack when a new action is performed
+          // Simplify the path to remove unnecessary segments and smooth the stroke
+          path.simplify();
+
+          path.fullySelected = false;  // Keep it selected to see the segments after simplification
+
+          const newSegmentCount = path.segments.length;
+          const difference = segmentCount - newSegmentCount;
+          const percentage = 100 - Math.round((newSegmentCount / segmentCount) * 100);
+          console.log(`${difference} of ${segmentCount} segments were removed, saving ${percentage}%`);
+
+          // Record the draw action
+          setActionStack((prevActions) => [
+            ...prevActions,
+            { type: 'draw', item: path },
+          ]);
+          setRedoStack([]);  // Clear the redo stack when a new action is performed
+        }
       };
     } else if (isEraserActive) {
       // Erasing mode
       tool.onMouseDown = (event) => {
-        setErasedItems([]);  // Clear the temporary erased items array at the start
         const hitResult = paper.project.hitTest(event.point, {
           stroke: true,
           tolerance: 10,
         });
         if (hitResult && hitResult.item) {
           hitResult.item.remove();
-          setErasedItems((prevErased) => [...prevErased, hitResult.item]);  // Add the erased item to the temporary array
+          setActionStack((prevActions) => [
+            ...prevActions,
+            { type: 'erase', item: hitResult.item },
+          ]);
+          setRedoStack([]);  // Clear the redo stack when a new action is performed
         }
       };
 
@@ -95,24 +96,18 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
         });
         if (hitResult && hitResult.item) {
           hitResult.item.remove();
-          setErasedItems((prevErased) => [...prevErased, hitResult.item]);  // Continue adding erased items during drag
+          setActionStack((prevActions) => [
+            ...prevActions,
+            { type: 'erase', item: hitResult.item },
+          ]);
         }
-      };
-
-      tool.onMouseUp = () => {
-        // After the mouse is released, record the entire erasing operation as one action
-        setActionStack((prevActions) => [
-          ...prevActions,
-          { type: 'erase', items: erasedItems },  // Record the entire erasing action as a single item
-        ]);
-        setRedoStack([]);  // Clear the redo stack when a new action is performed
       };
     } else {
       // Disable both drawing and erasing when neither tool is active
       tool.onMouseDown = null;
       tool.onMouseDrag = null;
     }
-  }, [isPenActive, isEraserActive, tool, erasedItems]);
+  }, [isPenActive, isEraserActive, tool, path]);
 
   // Memoize the undo handler to avoid re-renders
   const handleUndo = useCallback(() => {
@@ -124,9 +119,7 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
         lastAction.item.remove();
       } else if (lastAction.type === 'erase') {
         // Reapply all the erased items
-        lastAction.items.forEach((item) => {
-          item.addTo(paper.project);
-        });
+        lastAction.item.addTo(paper.project);
       }
 
       setRedoStack((prevRedoStack) => [...prevRedoStack, lastAction]);  // Push the undone action to the redo stack
@@ -144,9 +137,7 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, setUndoHandler, setRed
         lastUndoneAction.item.addTo(paper.project);
       } else if (lastUndoneAction.type === 'erase') {
         // Remove all the erased items again (redo the erasure)
-        lastUndoneAction.items.forEach((item) => {
-          item.remove();
-        });
+        lastUndoneAction.item.remove();
       }
 
       setActionStack((prevActions) => [...prevActions, lastUndoneAction]);  // Add the action back to the action stack
