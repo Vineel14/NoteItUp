@@ -1,56 +1,56 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import paper from 'paper';
 
 const HandwritingCanvas = ({ isPenActive }) => {
   const canvasRef = useRef(null);
-  const [tool, setTool] = useState(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    
-    // Initialize Paper.js with the canvas once
-    paper.setup(canvas);
 
-    // Create a new tool for drawing and set it only once
-    const newTool = new paper.Tool();
-    setTool(newTool);
+    // Create a unique Paper.js instance for each canvas
+    const scope = new paper.PaperScope();
+    scope.setup(canvas);
+
+    // Create a tool to handle pen drawing
+    const tool = new scope.Tool();
+    let path;
+
+    tool.onMouseDown = (event) => {
+      if (isPenActive) {
+        path = new scope.Path();
+        path.strokeColor = 'black';
+        path.strokeWidth = 2;
+        path.add(event.point);
+      }
+    };
+
+    tool.onMouseDrag = (event) => {
+      if (isPenActive && path) {
+        path.add(event.point);
+      }
+    };
 
     return () => {
-      // Clean up on component unmount
-      newTool.remove();
+      // Clean up tool when the component unmounts
+      tool.remove();
+      scope.remove();
     };
-  }, []);
+  }, [isPenActive]);
 
   useEffect(() => {
-    if (!tool) return;  // Ensure the tool exists
-
-    if (isPenActive) {
-      // Enable drawing functionality when the pen is active
-      let path;
-      tool.onMouseDown = (event) => {
-        path = new paper.Path();
-        path.strokeColor = 'black';
-        path.strokeWidth = 2;  // You can adjust stroke width for smoother lines
-        path.add(event.point);
-      };
-
-      tool.onMouseDrag = (event) => {
-        path.add(event.point);  // Add points to the path as the mouse drags
-      };
-    } else {
-      // Disable drawing but keep the tool registered
-      tool.onMouseDown = null;
-      tool.onMouseDrag = null;
-    }
-  }, [isPenActive, tool]);  // Only update the tool when isPenActive or tool changes
+    // Resize the canvas explicitly to match the A4 dimensions
+    const canvas = canvasRef.current;
+    canvas.width = 794;
+    canvas.height = 1123;
+  }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      resize="true"
       style={{
         width: '100%',
         height: '100%',
+        display: 'block',
       }}
     />
   );

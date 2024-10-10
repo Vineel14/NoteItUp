@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 
-const BottomBar = () => {
+const BottomBar = ({ currentPage, totalPages }) => {
   return (
     <Box
       sx={{
@@ -18,7 +18,7 @@ const BottomBar = () => {
       }}
     >
       <Typography variant="body2" component="div">
-        Page 1 of 1
+        Page {currentPage} of {totalPages}
       </Typography>
     </Box>
   );
