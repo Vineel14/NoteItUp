@@ -1,14 +1,12 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState} from 'react';
 import paper from 'paper';
 
-const HandwritingCanvas = ({ isPenActive, isEraserActive, penThickness, penColor, setUndoHandler, setRedoHandler }) => {
+const HandwritingCanvas = ({ isPenActive, isEraserActive, penThickness, penColor, addActionToGlobalStack }) => {
   const canvasRef = useRef(null);
-  const [scope, setScope] = useState(null);  // Unique PaperScope for each canvas
+  const [scope, setScope] = useState(null);
   const [tool, setTool] = useState(null);
-  const [actionStack, setActionStack] = useState([]);  // Stack to track all actions (pen or eraser)
-  const [redoStack, setRedoStack] = useState([]);  // Stack for undone actions
-  const [path, setPath] = useState(null);  // Track the current path being drawn
-  const [erasedItems, setErasedItems] = useState([]);  // Temporary array to hold erased items in a single action
+  const [path, setPath] = useState(null);
+  const [erasedItems, setErasedItems] = useState([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -21,7 +19,7 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, penThickness, penColor
 
     return () => {
       newTool.remove();
-      newScope.clear();  // Clear the scope on unmount
+      newScope.clear();
     };
   }, []);
 
@@ -31,7 +29,6 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, penThickness, penColor
     if (isPenActive) {
       tool.onMouseDown = (event) => {
         if (path) path.selected = false;
-
         const newPath = new scope.Path();
         newPath.strokeColor = penColor;
         newPath.strokeWidth = penThickness;
@@ -48,17 +45,15 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, penThickness, penColor
         if (path) {
           path.simplify();
           path.fullySelected = false;
-
-          setActionStack((prevActions) => [
-            ...prevActions,
-            { type: 'draw', item: path },
-          ]);
-          setRedoStack([]);
+          addActionToGlobalStack({
+            undo: () => path.remove(),
+            redo: () => path.addTo(scope.project),
+          });
         }
       };
     } else if (isEraserActive) {
       tool.onMouseDown = (event) => {
-        setErasedItems([]);  // Clear erased items at the start
+        setErasedItems([]);
         const hitResult = scope.project.hitTest(event.point, {
           stroke: true,
           tolerance: 10,
@@ -81,56 +76,16 @@ const HandwritingCanvas = ({ isPenActive, isEraserActive, penThickness, penColor
       };
 
       tool.onMouseUp = () => {
-        setActionStack((prevActions) => [
-          ...prevActions,
-          { type: 'erase', items: erasedItems },
-        ]);
-        setRedoStack([]);
+        addActionToGlobalStack({
+          undo: () => erasedItems.forEach((item) => item.addTo(scope.project)),
+          redo: () => erasedItems.forEach((item) => item.remove()),
+        });
       };
     } else {
       tool.onMouseDown = null;
       tool.onMouseDrag = null;
     }
-  }, [isPenActive, isEraserActive, tool, path, penThickness, penColor, erasedItems, scope]);
-
-  const handleUndo = useCallback(() => {
-    if (actionStack.length > 0) {
-      const lastAction = actionStack[actionStack.length - 1];
-
-      if (lastAction.type === 'draw') {
-        lastAction.item.remove();
-      } else if (lastAction.type === 'erase') {
-        lastAction.items.forEach((item) => {
-          item.addTo(scope.project);
-        });
-      }
-
-      setRedoStack((prevRedoStack) => [...prevRedoStack, lastAction]);
-      setActionStack((prevActions) => prevActions.slice(0, -1));
-    }
-  }, [actionStack, scope]);
-
-  const handleRedo = useCallback(() => {
-    if (redoStack.length > 0) {
-      const lastUndoneAction = redoStack[redoStack.length - 1];
-
-      if (lastUndoneAction.type === 'draw') {
-        lastUndoneAction.item.addTo(scope.project);
-      } else if (lastUndoneAction.type === 'erase') {
-        lastUndoneAction.items.forEach((item) => {
-          item.remove();
-        });
-      }
-
-      setActionStack((prevActions) => [...prevActions, lastUndoneAction]);
-      setRedoStack((prevRedoStack) => prevRedoStack.slice(0, -1));
-    }
-  }, [redoStack, scope]);
-
-  useEffect(() => {
-    setUndoHandler(() => handleUndo);
-    setRedoHandler(() => handleRedo);
-  }, [handleUndo, handleRedo, setUndoHandler, setRedoHandler]);
+  }, [isPenActive, isEraserActive, tool, path, penThickness, penColor, erasedItems, scope, addActionToGlobalStack]);
 
   return (
     <canvas

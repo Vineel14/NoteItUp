@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Box } from '@mui/material';
 import Editormenubar from './Editormenubar';
 import BottomBar from './BottomBar';
@@ -6,7 +6,7 @@ import HandwritingCanvas from './HandwritingCanvas';
 import UndoRedoButtons from './UndoRedoButtons';
 
 const EditorPage = ({ fileNumber }) => {
-  const [pages, setPages] = useState([{ id: 1 }]);  // Start with one page
+  const [pages, setPages] = useState([{ id: 1 }]);
   const [currentPage, setCurrentPage] = useState(1);
   const editorContentRef = useRef(null);
 
@@ -15,9 +15,16 @@ const EditorPage = ({ fileNumber }) => {
   const [penThickness, setPenThickness] = useState(1);
   const [penColor, setPenColor] = useState('#000000');
 
-  const [undoHandlers, setUndoHandlers] = useState({});
-  const [redoHandlers, setRedoHandlers] = useState({});
+  const [globalActionStack, setGlobalActionStack] = useState([]);
+  const [redoStack, setRedoStack] = useState([]);
 
+  // Function to add an action to the global stack
+  const addActionToGlobalStack = useCallback((action) => {
+    setGlobalActionStack((prev) => [...prev, action]);
+    setRedoStack([]); // Clear redo stack whenever a new action is added
+  }, []);
+
+  // Scroll handler for adding new pages
   useEffect(() => {
     const handleScroll = () => {
       const editor = editorContentRef.current;
@@ -45,9 +52,21 @@ const EditorPage = ({ fileNumber }) => {
     };
   }, [pages]);
 
-  const handleSetUndoRedo = (pageId, undoHandler, redoHandler) => {
-    setUndoHandlers((prev) => ({ ...prev, [pageId]: undoHandler }));
-    setRedoHandlers((prev) => ({ ...prev, [pageId]: redoHandler }));
+  // Undo and redo functions
+  const handleUndo = () => {
+    if (globalActionStack.length === 0) return;
+    const lastAction = globalActionStack[globalActionStack.length - 1];
+    lastAction.undo();
+    setGlobalActionStack((prev) => prev.slice(0, -1));
+    setRedoStack((prev) => [...prev, lastAction]);
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    const lastUndoneAction = redoStack[redoStack.length - 1];
+    lastUndoneAction.redo();
+    setRedoStack((prev) => prev.slice(0, -1));
+    setGlobalActionStack((prev) => [...prev, lastUndoneAction]);
   };
 
   return (
@@ -60,10 +79,7 @@ const EditorPage = ({ fileNumber }) => {
         fileNumber={fileNumber}
       />
 
-      <UndoRedoButtons
-        undo={undoHandlers[currentPage] || (() => {})}
-        redo={redoHandlers[currentPage] || (() => {})}
-      />
+      <UndoRedoButtons undo={handleUndo} redo={handleRedo} />
 
       <Box
         ref={editorContentRef}
@@ -72,7 +88,7 @@ const EditorPage = ({ fileNumber }) => {
           marginTop: '40px',
           marginBottom: '10px',
           height: 'calc(100vh - 150px)',
-          overflowY: 'scroll',
+          overflowY: 'auto',
           paddingTop: '40px',
           paddingBottom: '50px',
           display: 'flex',
@@ -101,8 +117,7 @@ const EditorPage = ({ fileNumber }) => {
               isEraserActive={isEraserActive}
               penThickness={penThickness}
               penColor={penColor}
-              setUndoHandler={(undo) => handleSetUndoRedo(page.id, undo, redoHandlers[page.id])}
-              setRedoHandler={(redo) => handleSetUndoRedo(page.id, undoHandlers[page.id], redo)}
+              addActionToGlobalStack={addActionToGlobalStack}
             />
           </Box>
         ))}
