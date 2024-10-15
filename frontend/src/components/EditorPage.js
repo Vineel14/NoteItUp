@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
 import Editormenubar from './Editormenubar';
 import BottomBar from './BottomBar';
 import HandwritingCanvas from './HandwritingCanvas';
 import UndoRedoButtons from './UndoRedoButtons';
 
-const EditorPage = ({ fileNumber }) => {
+const EditorPage = ({ fileNumber, onSaveFile, subject }) => {
   const [pages, setPages] = useState([{ id: 1 }]);
   const [currentPage, setCurrentPage] = useState(1);
   const editorContentRef = useRef(null);
+  const navigate = useNavigate();
+  const [fileName, setFileName] = useState(`File ${fileNumber}`);
 
   const [isPenActive, setIsPenActive] = useState(false);
   const [isEraserActive, setIsEraserActive] = useState(false);
@@ -18,19 +22,17 @@ const EditorPage = ({ fileNumber }) => {
   const [globalActionStack, setGlobalActionStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
 
-  // Function to add an action to the global stack
   const addActionToGlobalStack = useCallback((action) => {
     setGlobalActionStack((prev) => [...prev, action]);
     setRedoStack([]); // Clear redo stack whenever a new action is added
   }, []);
 
-  // Scroll handler for adding new pages
   useEffect(() => {
     const handleScroll = () => {
       const editor = editorContentRef.current;
       if (editor) {
         const scrollBottom = editor.scrollTop + editor.clientHeight;
-        if (scrollBottom >= editor.scrollHeight - 10) {
+        if (scrollBottom >= editor.scrollHeight - 20) {
           setPages((prevPages) => [...prevPages, { id: prevPages.length + 1 }]);
         }
 
@@ -52,7 +54,6 @@ const EditorPage = ({ fileNumber }) => {
     };
   }, [pages]);
 
-  // Undo and redo functions
   const handleUndo = () => {
     if (globalActionStack.length === 0) return;
     const lastAction = globalActionStack[globalActionStack.length - 1];
@@ -69,14 +70,46 @@ const EditorPage = ({ fileNumber }) => {
     setGlobalActionStack((prev) => [...prev, lastUndoneAction]);
   };
 
+  // Function to capture preview content from the first page
+  const getPreviewContent = () => {
+    const firstPageCanvas = editorContentRef.current.querySelector('canvas');
+    return firstPageCanvas ? firstPageCanvas.toDataURL() : '';
+  };
+
+  // Handle back button click
+  const handleBackClick = () => {
+    onSaveFile(fileName, getPreviewContent(), subject);
+    navigate("/");
+  };
+
   return (
     <div>
+      {/* Fixed Back Button */}
+      <IconButton
+        onClick={handleBackClick}
+        sx={{
+          position: 'fixed',
+          top: '80px',
+          left: '20px',
+          zIndex: 1300,
+          color: '#333333',
+          fontSize: '1.8rem',
+          '&:hover': {
+            color: '#000000',
+          }
+        }}
+      >
+        <ArrowBackIcon fontSize="inherit" />
+      </IconButton>
+
       <Editormenubar
         setIsPenActive={setIsPenActive}
         setIsEraserActive={setIsEraserActive}
         setPenThickness={setPenThickness}
         setPenColor={setPenColor}
         fileNumber={fileNumber}
+        fileName={fileName}
+        setFileName={setFileName}
       />
 
       <UndoRedoButtons undo={handleUndo} redo={handleRedo} />

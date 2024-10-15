@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { AppBar, Toolbar, Box, IconButton, ButtonGroup, Button, Menu, Typography, Divider } from '@mui/material';
-import CreateIcon from '@mui/icons-material/Create';  // Pen icon
-import DeleteIcon from '@mui/icons-material/Delete';  // Eraser icon
+import { AppBar, Toolbar, Box, IconButton, ButtonGroup, Button, Menu, Typography, Divider, TextField } from '@mui/material';
+import CreateIcon from '@mui/icons-material/Create';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { format } from 'date-fns';  // Helps format the date for the file name
+import { format } from 'date-fns';
 
 const colors = [
   '#000000', '#0000FF', '#FF0000', '#008000', '#FFFF00', '#FFA500', '#800080', '#FFC0CB', '#A52A2A', '#808080',
@@ -13,34 +13,44 @@ const colors = [
 
 const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, setPenColor, fileNumber }) => {
   const [fileName, setFileName] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedTool, setSelectedTool] = useState(null);  // For managing pen and eraser states
-  const [penSizeLabel, setPenSizeLabel] = useState('PEN(s)');  // For managing pen label
-  const [selectedThickness, setSelectedThickness] = useState('small'); // For selected thickness
-  const [selectedColor, setSelectedColor] = useState('black');  // For selected color
+  const [selectedTool, setSelectedTool] = useState(null);
+  const [penSizeLabel, setPenSizeLabel] = useState('PEN(s)');
+  const [selectedThickness, setSelectedThickness] = useState('small');
+  const [selectedColor, setSelectedColor] = useState('black');
 
-  // Set the default file name as "Month Date, Year (N)"
   useEffect(() => {
     const currentDate = new Date();
     const formattedDate = format(currentDate, 'MMMM dd, yyyy');
     setFileName(`${formattedDate} (${fileNumber})`);
   }, [fileNumber]);
 
-  // Handle pen selection
+  const handleFileNameChange = (event) => {
+    if (event.key === 'Enter' || event.type === 'blur') {
+      if (fileName.trim() === '') {
+        const currentDate = new Date();
+        const formattedDate = format(currentDate, 'MMMM dd, yyyy');
+        setFileName(`${formattedDate} (${fileNumber})`);  // Set default name if empty
+      }
+      setIsEditing(false);
+    } else {
+      setFileName(event.target.value);
+    }
+  };
+
   const handlePenClick = () => {
     setIsPenActive(true);
     setIsEraserActive(false);
     setSelectedTool('pen');
   };
 
-  // Handle eraser selection
   const handleEraserClick = () => {
     setIsPenActive(false);
     setIsEraserActive(true);
     setSelectedTool('eraser');
   };
 
-  // Handle dropdown for pen options
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -49,7 +59,6 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, set
     setAnchorEl(null);
   };
 
-  // Handle thickness selection
   const handleThicknessClick = (size) => {
     if (size === 'small') {
       setPenThickness(1);
@@ -64,28 +73,50 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, set
     setSelectedThickness(size);
   };
 
-  // Handle color selection
   const handleColorClick = (color) => {
-    setPenColor(color);  // Update the pen color in the parent component
+    setPenColor(color);
     setSelectedColor(color);
   };
 
   return (
     <AppBar position="fixed" sx={{ backgroundColor: '#D4E7FF' }}>
       <Toolbar>
-        {/* Left side: Display file name */}
-        <Box sx={{ flexGrow: 1, color: 'black', fontWeight: 'bold' }}>
-          {fileName}
+        {/* Left side: Display file name with a fixed width for consistency */}
+        <Box sx={{ flexGrow: 1, color: 'black', fontWeight: 'bold', width: '250px' }}>
+          {isEditing ? (
+            <TextField
+              value={fileName}
+              onChange={(e) => setFileName(e.target.value)}
+              onBlur={handleFileNameChange}
+              onKeyDown={handleFileNameChange}
+              autoFocus
+              variant="standard"
+              inputProps={{ style: { fontWeight: 'bold', fontSize: '1rem' } }}
+              sx={{ color: 'black', width: '35%' }}
+            />
+          ) : (
+            <Typography
+              onClick={() => setIsEditing(true)}
+              sx={{
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                color: 'black',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {fileName || 'Click to edit file name'}  {/* Display placeholder if empty */}
+            </Typography>
+          )}
         </Box>
 
         {/* Center the Pen and Eraser Buttons */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexGrow: 1, marginRight: '600px' }}>
-          {/* Pen Button with Dropdown */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexGrow: 1, marginRight: '650px' }}>
           <ButtonGroup variant="contained" sx={{ display: 'flex', gap: 0, backgroundColor: '#D8D8D8', border: '1px solid #828282', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)' }}>
-            {/* Pen Button */}
             <Button
               onClick={handlePenClick}
-              color={selectedTool === 'pen' ? 'primary' : '#D8D8D8'}  // Distinguish the selected tool
+              color={selectedTool === 'pen' ? 'primary' : '#D8D8D8'}
               sx={{
                 backgroundColor: selectedTool === 'pen' ? '#329932' : '#D8D8D8',
                 color: 'black',
@@ -94,7 +125,6 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, set
               <CreateIcon /> {penSizeLabel}
             </Button>
 
-            {/* Dropdown Button for Pen Options */}
             <IconButton
               size="small"
               onClick={handleMenuClick}
@@ -102,21 +132,19 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, set
                 backgroundColor: '#D8D8D8',
                 color: 'black',
                 '&:hover': {
-                  backgroundColor: '#C2C2C2',  
+                  backgroundColor: '#C2C2C2',
                 },
               }}
             >
               <ArrowDropDownIcon />
             </IconButton>
 
-            {/* Dropdown Menu for Pen Options */}
             <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
               sx={{ padding: '10px' }}
             >
-              {/* Thickness options */}
               <Typography variant="caption" sx={{ padding: '5px 10px', fontWeight: 'bold' }}>Thickness</Typography>
               <Box sx={{ display: 'flex', gap: 2, padding: '5px 10px' }}>
                 <Typography
@@ -154,10 +182,7 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, set
                 </Typography>
               </Box>
 
-              {/* Divider between Thickness and Color */}
               <Divider sx={{ margin: '10px 0' }} />
-
-              {/* Color options */}
               <Typography variant="caption" sx={{ padding: '5px 10px', fontWeight: 'bold' }}>Color</Typography>
               <Box sx={{ 
                 display: 'grid', 
@@ -165,7 +190,7 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, set
                 gap: 2, 
                 padding: '5px 10px', 
                 maxHeight: '150px', 
-                overflowY: 'auto'  // Make the color grid scrollable
+                overflowY: 'auto'
               }}>
                 {colors.map((color) => (
                   <Box
@@ -185,21 +210,19 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, set
             </Menu>
           </ButtonGroup>
 
-          {/* Eraser Button */}
           <Button
             onClick={handleEraserClick}
             color={selectedTool === 'eraser' ? 'primary' : 'default'}
             sx={{
               backgroundColor: selectedTool === 'eraser' ? '#329932' : '#D8D8D8',
               color: 'black',
-              border: '1px solid #828282',  // Add slight black border
+              border: '1px solid #828282',
               boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
             }}
           >
             <DeleteIcon />
           </Button>
         </Box>
-
       </Toolbar>
     </AppBar>
   );
