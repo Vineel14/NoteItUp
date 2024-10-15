@@ -7,12 +7,11 @@ import BottomBar from './BottomBar';
 import HandwritingCanvas from './HandwritingCanvas';
 import UndoRedoButtons from './UndoRedoButtons';
 
-const EditorPage = ({ fileNumber, onSaveFile, subject }) => {
+const EditorPage = ({ fileNumber }) => {
   const [pages, setPages] = useState([{ id: 1 }]);
   const [currentPage, setCurrentPage] = useState(1);
   const editorContentRef = useRef(null);
   const navigate = useNavigate();
-  const [fileName, setFileName] = useState(`File ${fileNumber}`);
 
   const [isPenActive, setIsPenActive] = useState(false);
   const [isEraserActive, setIsEraserActive] = useState(false);
@@ -70,23 +69,11 @@ const EditorPage = ({ fileNumber, onSaveFile, subject }) => {
     setGlobalActionStack((prev) => [...prev, lastUndoneAction]);
   };
 
-  // Function to capture preview content from the first page
-  const getPreviewContent = () => {
-    const firstPageCanvas = editorContentRef.current.querySelector('canvas');
-    return firstPageCanvas ? firstPageCanvas.toDataURL() : '';
-  };
-
-  // Handle back button click
-  const handleBackClick = () => {
-    onSaveFile(fileName, getPreviewContent(), subject);
-    navigate("/");
-  };
-
   return (
     <div>
       {/* Fixed Back Button */}
       <IconButton
-        onClick={handleBackClick}
+        onClick={() => navigate('/')}
         sx={{
           position: 'fixed',
           top: '80px',
@@ -108,8 +95,6 @@ const EditorPage = ({ fileNumber, onSaveFile, subject }) => {
         setPenThickness={setPenThickness}
         setPenColor={setPenColor}
         fileNumber={fileNumber}
-        fileName={fileName}
-        setFileName={setFileName}
       />
 
       <UndoRedoButtons undo={handleUndo} redo={handleRedo} />
