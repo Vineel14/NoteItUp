@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { AppBar, Toolbar, Box, IconButton, ButtonGroup, Button, Menu, Typography, Divider, TextField } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { format } from 'date-fns';
 
 const colors = [
   '#000000', '#0000FF', '#FF0000', '#008000', '#FFFF00', '#FFA500', '#800080', '#FFC0CB', '#A52A2A', '#808080',
@@ -11,8 +10,8 @@ const colors = [
   '#800020', '#800000', '#FFDAB9', '#FF7F50', '#FFD700', '#C0C0C0', '#E6E6FA', '#000080', '#228B22', '#F5F5DC'
 ];
 
-const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, setPenColor, fileNumber }) => {
-  const [fileName, setFileName] = useState('');
+const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, setPenColor, fileName }) => {
+  const [filename, setfilename] = useState(fileName);
   const [isEditing, setIsEditing] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedTool, setSelectedTool] = useState(null);
@@ -20,22 +19,15 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, set
   const [selectedThickness, setSelectedThickness] = useState('small');
   const [selectedColor, setSelectedColor] = useState('black');
 
-  useEffect(() => {
-    const currentDate = new Date();
-    const formattedDate = format(currentDate, 'MMMM dd, yyyy');
-    setFileName(`${formattedDate} (${fileNumber})`);
-  }, [fileNumber]);
 
   const handleFileNameChange = (event) => {
     if (event.key === 'Enter' || event.type === 'blur') {
       if (fileName.trim() === '') {
-        const currentDate = new Date();
-        const formattedDate = format(currentDate, 'MMMM dd, yyyy');
-        setFileName(`${formattedDate} (${fileNumber})`);  // Set default name if empty
+        setfilename(fileName);  // Set default name if empty
       }
       setIsEditing(false);
     } else {
-      setFileName(event.target.value);
+      setfilename(event.target.value);
     }
   };
 
@@ -85,8 +77,8 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, set
         <Box sx={{ flexGrow: 1, color: 'black', fontWeight: 'bold', width: '250px' }}>
           {isEditing ? (
             <TextField
-              value={fileName}
-              onChange={(e) => setFileName(e.target.value)}
+              value={filename}
+              onChange={(e) => setfilename(e.target.value)}
               onBlur={handleFileNameChange}
               onKeyDown={handleFileNameChange}
               autoFocus
