@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useDispatch } from 'react-redux'; // Import useDispatch
-import { setUserId } from '../store/userSlice'; // Import setUserId action
+import { useDispatch } from 'react-redux';
+import { setUserId } from '../store/userSlice';
 import { 
   Box, 
   Tab, 
@@ -17,7 +17,7 @@ import { Facebook, Google, Twitter, GitHub } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 const AuthPage = () => {
-  const dispatch = useDispatch(); // Initialize dispatch
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [tab, setTab] = useState(0);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -34,12 +34,9 @@ const AuthPage = () => {
     try {
       const response = await axios.post('/auth/login', loginData);
       console.log('Login successful:', response.data);
-
-      // Extract and dispatch userId to Redux
       const userId = response.data.user.id;
-      dispatch(setUserId(userId)); // Dispatch userId
-
-      navigate("/home"); // Redirect to home after successful login
+      dispatch(setUserId(userId));
+      navigate("/home");
     } catch (err) {
       setError(err.response?.data.message || 'Login failed');
     }
@@ -57,6 +54,16 @@ const AuthPage = () => {
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" mt={5}>
+      {/* App Name */}
+      <Typography 
+        variant="h3" 
+        component="h1" 
+        color="primary" 
+        sx={{ fontFamily: 'Roboto', fontWeight: 'bold', mb: 2 }}
+      >
+        NoteItUp
+      </Typography>
+
       <Tabs value={tab} onChange={handleTabChange} centered>
         <Tab label="Login" />
         <Tab label="Register" />
