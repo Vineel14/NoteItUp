@@ -23,20 +23,21 @@ const AuthPage = () => {
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({ name: '', username: '', email: '', password: '' });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(''); // Success message state
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
     setError('');
+    setSuccess(''); // Clear any success message when switching tabs
   };
 
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
       const response = await axios.post('/auth/login', loginData);
-      console.log('Login successful:', response.data);
       const userId = response.data.user.id;
       dispatch(setUserId(userId));
-      navigate("/home");
+      navigate("/home"); // Redirect to home after successful login
     } catch (err) {
       setError(err.response?.data.message || 'Login failed');
     }
@@ -46,7 +47,8 @@ const AuthPage = () => {
     event.preventDefault();
     try {
       const response = await axios.post('/auth/register', registerData);
-      console.log('Registration successful:', response.data);
+      setSuccess('Registration successful! Please log in.'); // Show success message
+      setTab(0); // Switch to the login tab
     } catch (err) {
       setError(err.response?.data.message || 'Registration failed');
     }
@@ -63,6 +65,9 @@ const AuthPage = () => {
       >
         NoteItUp
       </Typography>
+
+      {/* Success message display */}
+      {success && <Typography color="primary" mt={2}>{success}</Typography>}
 
       <Tabs value={tab} onChange={handleTabChange} centered>
         <Tab label="Login" />
