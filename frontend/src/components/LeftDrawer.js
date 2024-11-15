@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux'; // Import useSelector
 import { setSelectedSubject } from '../store/userSlice';
-import axios from 'axios';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, Divider } from '@mui/material';
 import { Settings, Help, Add, MoreVert } from '@mui/icons-material';
+import axios from '../axiosConfig'; // Use the configured Axios instance
+
 
 const drawerWidth = 240;
 

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { setUserId } from '../store/userSlice';
 import { 
@@ -15,6 +14,8 @@ import {
 } from '@mui/material';
 import { Facebook, Google, Twitter, GitHub } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import axios from '../axiosConfig'; // Use the configured Axios instance
+
 
 const AuthPage = () => {
   const dispatch = useDispatch();
@@ -46,13 +47,14 @@ const AuthPage = () => {
   const handleRegister = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('/auth/register', registerData);
-      setSuccess('Registration successful! Please log in.'); // Show success message
-      setTab(0); // Switch to the login tab
+      await axios.post('/auth/register', registerData); // No need to assign the response
+      setSuccess('Registration successful! Please log in.');
+      setTab(0);
     } catch (err) {
       setError(err.response?.data.message || 'Registration failed');
     }
   };
+  
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" mt={5}>
