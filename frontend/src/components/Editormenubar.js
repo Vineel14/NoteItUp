@@ -104,7 +104,16 @@ const Editormenubar = ({ setIsPenActive, setIsEraserActive, setPenThickness, set
         </Box>
 
         {/* Center the Pen and Eraser Buttons */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexGrow: 1, marginRight: '650px' }}>
+        <Box sx={{
+              position: 'absolute', // Ensures the box stays at a fixed position
+              left: '50%', // Centers horizontally
+              transform: 'translateX(-50%)', // Correct centering
+              top: '15px', // Adjust vertical alignment (you can modify as needed)
+              zIndex: 10, // Ensures it stays above other content
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
           <ButtonGroup variant="contained" sx={{ display: 'flex', gap: 0, backgroundColor: '#D8D8D8', border: '1px solid #828282', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)' }}>
             <Button
               onClick={handlePenClick}
