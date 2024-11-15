@@ -8,7 +8,7 @@ const cors = require('cors');
 app.use(cors({
   origin: [
     'http://localhost:3000', // Local development
-    'https://glowing-sprite-e05a8a.netlify.app' // Netlify deployment
+    'https://noteitup-v1.netlify.app' // Netlify deployment
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'userId']
