@@ -5,11 +5,13 @@ const authRoutes = require('./routes/auth');
 const fileRoutes = require('./routes/fileRoutes'); // Import file routes
 const cors = require('cors');
 
-// Enable CORS
 app.use(cors({
-  origin: 'http://localhost:3000', // Allow requests from this origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
-  allowedHeaders: ['Content-Type', 'Authorization', 'userId'], // Allowed headers
+  origin: [
+    'http://localhost:3000', // Local development
+    'https://glowing-sprite-e05a8a.netlify.app' // Netlify deployment
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'userId']
 }));
 
 // Handle Preflight `OPTIONS` Requests
