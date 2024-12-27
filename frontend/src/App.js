@@ -9,6 +9,17 @@ import EditorPage from './components/EditorPage';
 import { Typography, Box } from '@mui/material';
 import { format } from 'date-fns';
 
+import formbricks from "@formbricks/js";
+  
+if (typeof window !== "undefined") {
+  formbricks.init({
+    environmentId: "cm56ahwvn000mjw03yo59osvx",
+    apiHost: "https://app.formbricks.com",
+    userId: "testUser",
+  });
+}
+
+
 function App() {
   const selectedSubject = useSelector((state) => state.user.selectedSubject); // Access selectedSubject from Redux
   const [fileCount, setFileCount] = useState(1);  // Track the number of files created
